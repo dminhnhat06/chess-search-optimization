@@ -27,6 +27,9 @@ analysis = [
     "matplotlib>=3.7",
 ]
 
+[project.scripts]
+ai-chess-uci = "ai_chess.uci.__main__:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

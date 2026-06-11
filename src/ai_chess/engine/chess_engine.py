@@ -9,6 +9,10 @@ from ai_chess.engine.metrics import SearchMetrics
 from ai_chess.evaluation.evaluator import BasicEvaluator
 from ai_chess.search.base import SearchAlgorithm
 
+# Engine identity constants used by the UCI protocol layer.
+ENGINE_NAME = "AI Chess"
+ENGINE_AUTHOR = "AI Chess Research"
+
 
 class ChessEngine:
     """High-level chess engine that coordinates search and evaluation.
@@ -17,6 +21,20 @@ class ChessEngine:
     and an engine configuration. It manages metrics lifecycle and
     delegates the actual search to the configured algorithm.
     """
+
+    # ------------------------------------------------------------------
+    # Identity properties (used by UCI 'id' response)
+    # ------------------------------------------------------------------
+
+    @property
+    def name(self) -> str:
+        """Return the engine name for UCI identification."""
+        return ENGINE_NAME
+
+    @property
+    def author(self) -> str:
+        """Return the engine author for UCI identification."""
+        return ENGINE_AUTHOR
 
     def __init__(
         self,
@@ -55,3 +73,13 @@ class ChessEngine:
             board, self.evaluator, self.config, metrics
         )
         return best_move, metrics
+
+    def new_game(self) -> None:
+        """Reset engine state for a new game.
+
+        Called by the UCI layer in response to 'ucinewgame'. Clears
+        any cached data (e.g., transposition tables) so the next
+        search starts fresh.
+        """
+        # Future: clear transposition table, killer moves, history, etc.
+        pass
