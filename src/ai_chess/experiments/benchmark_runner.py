@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import chess
 
-from ai_chess.engine.chess_engine import ChessEngine
-from ai_chess.experiments.fen_loader import TestPosition
+if TYPE_CHECKING:
+    from ai_chess.engine.chess_engine import ChessEngine
+    from ai_chess.experiments.fen_loader import TestPosition
 
 
 def run_benchmark(

@@ -9,7 +9,6 @@ from __future__ import annotations
 import io
 
 import chess
-import pytest
 
 from ai_chess.uci.session import UCISession
 
@@ -75,7 +74,7 @@ class TestPositionAndGo:
         lines = output.strip().split("\n")
 
         # Should contain a bestmove response
-        bestmove_lines = [l for l in lines if l.startswith("bestmove")]
+        bestmove_lines = [line for line in lines if line.startswith("bestmove")]
         assert len(bestmove_lines) == 1
 
         # The bestmove should be a valid UCI move (4-5 chars)
@@ -90,7 +89,7 @@ class TestPositionAndGo:
             "quit\n"
         )
         lines = output.strip().split("\n")
-        bestmove_lines = [l for l in lines if l.startswith("bestmove")]
+        bestmove_lines = [line for line in lines if line.startswith("bestmove")]
         assert len(bestmove_lines) == 1
 
     def test_fen_position_and_go(self) -> None:
@@ -102,7 +101,7 @@ class TestPositionAndGo:
             "quit\n"
         )
         lines = output.strip().split("\n")
-        bestmove_lines = [l for l in lines if l.startswith("bestmove")]
+        bestmove_lines = [line for line in lines if line.startswith("bestmove")]
         assert len(bestmove_lines) == 1
 
     def test_info_before_bestmove(self) -> None:
@@ -114,15 +113,19 @@ class TestPositionAndGo:
         )
         lines = output.strip().split("\n")
 
-        info_lines = [l for l in lines if l.startswith("info")]
-        bestmove_lines = [l for l in lines if l.startswith("bestmove")]
+        info_lines = [line for line in lines if line.startswith("info")]
+        bestmove_lines = [line for line in lines if line.startswith("bestmove")]
 
         assert len(info_lines) >= 1
         assert len(bestmove_lines) == 1
 
         # info should appear before bestmove
-        info_idx = next(i for i, l in enumerate(lines) if l.startswith("info"))
-        bm_idx = next(i for i, l in enumerate(lines) if l.startswith("bestmove"))
+        info_idx = next(
+            i for i, line in enumerate(lines) if line.startswith("info")
+        )
+        bm_idx = next(
+            i for i, line in enumerate(lines) if line.startswith("bestmove")
+        )
         assert info_idx < bm_idx
 
     def test_info_contains_depth_and_nodes(self) -> None:
@@ -133,7 +136,7 @@ class TestPositionAndGo:
             "quit\n"
         )
         lines = output.strip().split("\n")
-        info_line = next(l for l in lines if l.startswith("info"))
+        info_line = next(line for line in lines if line.startswith("info"))
 
         assert "depth" in info_line
         assert "nodes" in info_line
@@ -193,5 +196,5 @@ class TestMultipleSearches:
             "quit\n"
         )
         lines = output.strip().split("\n")
-        bestmove_lines = [l for l in lines if l.startswith("bestmove")]
+        bestmove_lines = [line for line in lines if line.startswith("bestmove")]
         assert len(bestmove_lines) == 2

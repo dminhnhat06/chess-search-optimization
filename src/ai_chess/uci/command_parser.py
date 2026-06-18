@@ -7,6 +7,7 @@ making downstream handling straightforward and testable.
 
 from __future__ import annotations
 
+from contextlib import suppress
 from dataclasses import dataclass, field
 
 
@@ -141,10 +142,8 @@ def _parse_go(tokens: list[str]) -> UCICommand:
             params["infinite"] = True
             idx += 1
         elif token in int_keywords and idx + 1 < len(tokens):
-            try:
+            with suppress(ValueError):
                 params[token] = int(tokens[idx + 1])
-            except ValueError:
-                pass
             idx += 2
         else:
             idx += 1

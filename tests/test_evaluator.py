@@ -41,7 +41,8 @@ class TestBasicEvaluator:
 
     def test_stalemate_returns_zero(self, evaluator: BasicEvaluator) -> None:
         """A stalemate position should evaluate to DRAW_SCORE (0)."""
-        # Black king on a1, White king on a3, White queen on b3 — Black to move, stalemate
+        # Black king on a1, White king on a3, White queen on b3.
+        # Black to move, stalemate.
         board = chess.Board("8/8/8/8/8/KQ6/8/k7 b - - 0 1")
         assert board.is_stalemate()
         score = evaluator.evaluate(board)
@@ -50,7 +51,10 @@ class TestBasicEvaluator:
     def test_checkmate_white_wins(self, evaluator: BasicEvaluator) -> None:
         """A checkmate where Black is mated should return +CHECKMATE_SCORE."""
         # Scholar's mate final position (Black is checkmated)
-        board = chess.Board("r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4")
+        board = chess.Board(
+            "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/"
+            "PPPP1PPP/RNB1K1NR b KQkq - 0 4"
+        )
         assert board.is_checkmate()
         score = evaluator.evaluate(board)
         assert score == CHECKMATE_SCORE
@@ -58,7 +62,10 @@ class TestBasicEvaluator:
     def test_checkmate_black_wins(self, evaluator: BasicEvaluator) -> None:
         """A checkmate where White is mated should return -CHECKMATE_SCORE."""
         # Fool's mate (White is checkmated)
-        board = chess.Board("rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3")
+        board = chess.Board(
+            "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/"
+            "PPPPP2P/RNBQKBNR w KQkq - 1 3"
+        )
         assert board.is_checkmate()
         score = evaluator.evaluate(board)
         assert score == -CHECKMATE_SCORE

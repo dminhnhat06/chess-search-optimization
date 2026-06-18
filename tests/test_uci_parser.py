@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
-from ai_chess.uci.command_parser import UCICommand, parse_command
+from ai_chess.uci.command_parser import parse_command
 
 
 class TestSimpleCommands:

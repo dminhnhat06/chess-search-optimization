@@ -8,7 +8,6 @@ from pathlib import Path
 
 import chess
 
-
 REQUIRED_COLUMNS = {"id", "fen", "category"}
 
 

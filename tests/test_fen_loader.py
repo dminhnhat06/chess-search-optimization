@@ -1,7 +1,6 @@
 """Tests for FEN position loader."""
 
 import csv
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -59,7 +58,15 @@ class TestFenLoader:
         csv_path = tmp_path / "bad.csv"
         _write_csv(
             csv_path,
-            [{"id": "pos1", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}],
+            [
+                {
+                    "id": "pos1",
+                    "fen": (
+                        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/"
+                        "RNBQKBNR w KQkq - 0 1"
+                    ),
+                }
+            ],
             fieldnames=["id", "fen"],  # missing 'category'
         )
 

@@ -7,7 +7,10 @@ ready to be sent to the GUI via stdout.
 
 from __future__ import annotations
 
-import chess
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import chess
 
 
 def uci_id(name: str, author: str) -> list[str]:
