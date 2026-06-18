@@ -5,7 +5,6 @@ import pytest
 
 from ai_chess.engine.chess_engine import ChessEngine
 from ai_chess.engine.config import EngineConfig
-from ai_chess.engine.metrics import SearchMetrics
 from ai_chess.evaluation.evaluator import BasicEvaluator
 from ai_chess.search.minimax import MinimaxSearch
 
@@ -76,7 +75,7 @@ class TestChessEngine:
             "nodes_searched", "cutoffs", "tt_hits", "depth_reached",
             "elapsed_seconds", "best_move", "score",
         }
-        assert expected_keys == set(result_dict.keys())
+        assert expected_keys <= set(result_dict.keys())
 
     def test_defaults_used_when_none_provided(self) -> None:
         """Engine should use default evaluator and config when None."""

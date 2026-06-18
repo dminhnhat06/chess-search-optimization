@@ -122,7 +122,16 @@ def _parse_go(tokens: list[str]) -> UCICommand:
     params: dict[str, object] = {}
 
     # Keywords that take an integer argument
-    int_keywords = {"depth", "movetime", "wtime", "btime", "winc", "binc"}
+    int_keywords = {
+        "depth",
+        "movetime",
+        "nodes",
+        "wtime",
+        "btime",
+        "winc",
+        "binc",
+        "movestogo",
+    }
 
     idx = 1
     while idx < len(tokens):

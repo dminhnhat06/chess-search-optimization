@@ -9,14 +9,25 @@ from dataclasses import dataclass
 class EngineConfig:
     """Configuration for the chess engine.
 
-    Controls search depth, time limits, and which optimizations are enabled.
+    Controls default depth, default time limits, and optional features used by
+    algorithms that support them. It does not instantiate or select the search
+    algorithm; that is controlled by ``ChessEngine.search_algorithm`` or by
+    the preset factory.
     """
 
     max_depth: int = 3
     time_limit_seconds: float | None = None
+
+    use_alpha_beta: bool = True
     use_move_ordering: bool = False
     use_transposition_table: bool = False
+    use_iterative_deepening: bool = False
     use_quiescence: bool = False
+
+    hash_size_mb: int = 64
+    quiescence_max_depth: int = 8
+    deterministic: bool = True
+    move_overhead_ms: int = 20
 
     def __post_init__(self) -> None:
         """Validate configuration values after initialization."""
@@ -28,4 +39,17 @@ class EngineConfig:
             raise ValueError(
                 f"time_limit_seconds must be positive or None, "
                 f"got {self.time_limit_seconds}"
+            )
+        if self.hash_size_mb < 0:
+            raise ValueError(
+                f"hash_size_mb must be non-negative, got {self.hash_size_mb}"
+            )
+        if self.quiescence_max_depth < 0:
+            raise ValueError(
+                "quiescence_max_depth must be non-negative, "
+                f"got {self.quiescence_max_depth}"
+            )
+        if self.move_overhead_ms < 0:
+            raise ValueError(
+                f"move_overhead_ms must be non-negative, got {self.move_overhead_ms}"
             )

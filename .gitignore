@@ -9,3 +9,5 @@ build/
 *.egg-info/
 data/results/*.csv
 data/results/*.json
+fastchess-windows-x86-64
+data/results/

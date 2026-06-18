@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
-import chess
+from typing import TYPE_CHECKING
 
 from ai_chess.engine.config import EngineConfig
-from ai_chess.engine.metrics import SearchMetrics
+from ai_chess.engine.limits import SearchLimits
 from ai_chess.evaluation.evaluator import BasicEvaluator
-from ai_chess.search.base import SearchAlgorithm
+
+if TYPE_CHECKING:
+    import chess
+
+    from ai_chess.engine.metrics import SearchMetrics
+    from ai_chess.engine.result import SearchResult
+    from ai_chess.search.base import SearchAlgorithm
 
 # Engine identity constants used by the UCI protocol layer.
 ENGINE_NAME = "AI Chess"
@@ -53,6 +59,20 @@ class ChessEngine:
         self.evaluator = evaluator or BasicEvaluator()
         self.config = config or EngineConfig()
 
+    def search(
+        self,
+        board: chess.Board,
+        limits: SearchLimits | None = None,
+    ) -> SearchResult:
+        """Search the given board and return a structured result."""
+        effective_limits = limits or self._default_limits()
+        return self.search_algorithm.search(
+            board,
+            self.evaluator,
+            self.config,
+            effective_limits,
+        )
+
     def find_best_move(
         self, board: chess.Board
     ) -> tuple[chess.Move | None, SearchMetrics]:
@@ -68,11 +88,12 @@ class ChessEngine:
             A tuple of (best_move, search_metrics). best_move is None
             if no legal moves exist.
         """
-        metrics = SearchMetrics()
-        best_move = self.search_algorithm.find_best_move(
-            board, self.evaluator, self.config, metrics
-        )
-        return best_move, metrics
+        result = self.search(board, SearchLimits(depth=self.config.max_depth))
+        return result.best_move, result.metrics
+
+    def reset(self) -> None:
+        """Reset algorithm-local state such as transposition tables."""
+        self.search_algorithm.reset()
 
     def new_game(self) -> None:
         """Reset engine state for a new game.
@@ -81,5 +102,12 @@ class ChessEngine:
         any cached data (e.g., transposition tables) so the next
         search starts fresh.
         """
-        # Future: clear transposition table, killer moves, history, etc.
-        pass
+        self.reset()
+
+    def _default_limits(self) -> SearchLimits:
+        movetime_ms = (
+            int(self.config.time_limit_seconds * 1000)
+            if self.config.time_limit_seconds is not None
+            else None
+        )
+        return SearchLimits(depth=self.config.max_depth, movetime_ms=movetime_ms)

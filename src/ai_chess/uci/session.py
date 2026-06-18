@@ -15,6 +15,7 @@ import chess
 
 from ai_chess.engine.chess_engine import ChessEngine
 from ai_chess.engine.config import EngineConfig
+from ai_chess.engine.limits import SearchLimits
 from ai_chess.evaluation.evaluator import BasicEvaluator
 from ai_chess.search.minimax import MinimaxSearch
 from ai_chess.uci.command_parser import UCICommand, parse_command
@@ -164,12 +165,24 @@ class UCISession:
             cmd: Parsed command with optional 'depth', 'movetime', etc.
         """
         depth = cmd.params.get("depth")
-        if depth is not None:
-            self.engine.config = EngineConfig(max_depth=int(depth))
-        else:
-            self.engine.config = EngineConfig(max_depth=_DEFAULT_DEPTH)
+        search_depth = int(depth) if depth is not None else _DEFAULT_DEPTH
+        self.engine.config = EngineConfig(max_depth=search_depth)
 
-        move, metrics = self.engine.find_best_move(self.board)
+        limits = SearchLimits(
+            depth=search_depth,
+            movetime_ms=_optional_int(cmd.params.get("movetime")),
+            nodes=_optional_int(cmd.params.get("nodes")),
+            wtime_ms=_optional_int(cmd.params.get("wtime")),
+            btime_ms=_optional_int(cmd.params.get("btime")),
+            winc_ms=_optional_int(cmd.params.get("winc")),
+            binc_ms=_optional_int(cmd.params.get("binc")),
+            movestogo=_optional_int(cmd.params.get("movestogo")),
+            infinite=bool(cmd.params.get("infinite", False)),
+        )
+
+        result = self.engine.search(self.board, limits)
+        move = result.best_move
+        metrics = result.metrics
 
         # Send search info
         time_ms = int(metrics.elapsed_seconds * 1000)
@@ -177,8 +190,9 @@ class UCISession:
             info(
                 depth=metrics.depth_reached,
                 score_cp=metrics.score,
-                nodes=metrics.nodes_searched,
+                nodes=result.nodes,
                 time_ms=time_ms,
+                pv=result.pv,
             )
         )
 
@@ -209,3 +223,9 @@ class UCISession:
         """
         self._output.write(text + "\n")
         self._output.flush()
+
+
+def _optional_int(value: object) -> int | None:
+    if value is None:
+        return None
+    return int(value)
