@@ -68,26 +68,22 @@ def _config_for_preset(
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=False,
         )
     if preset == "v1_alpha_beta":
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=True,
         )
     if preset == "v2_alpha_beta_ordering":
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=True,
             use_move_ordering=True,
         )
     if preset == "v3_alpha_beta_ordering_tt":
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=True,
             use_move_ordering=True,
             use_transposition_table=True,
         )
@@ -95,16 +91,13 @@ def _config_for_preset(
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=True,
             use_move_ordering=True,
             use_transposition_table=True,
-            use_iterative_deepening=True,
         )
     if preset == "v5_quiescence":
         return EngineConfig(
             max_depth=max_depth,
             time_limit_seconds=time_limit_seconds,
-            use_alpha_beta=True,
             use_move_ordering=True,
             use_transposition_table=True,
             use_quiescence=True,

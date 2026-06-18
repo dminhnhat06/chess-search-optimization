@@ -144,9 +144,6 @@ class TranspositionTable:
             self._table.get(key) is entry or len(self._table) > old_size
         ):
             metrics.tt_stores += 1
-            # The dict is keyed by the full hash value, so this implementation
-            # cannot observe lower-level hash bucket collisions. The metric is
-            # reserved for future fixed-size/indexed table implementations.
 
     def clear(self) -> None:
         """Remove all entries from the transposition table."""

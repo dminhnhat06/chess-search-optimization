@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import chess
 
-from ai_chess.engine.limits import SearchLimits
 from ai_chess.engine.metrics import SearchMetrics
 from ai_chess.optimization.search_controller import SearchController
 from ai_chess.search.base import (
@@ -19,6 +18,7 @@ from ai_chess.search.base import (
 
 if TYPE_CHECKING:
     from ai_chess.engine.config import EngineConfig
+    from ai_chess.engine.limits import SearchLimits
     from ai_chess.engine.result import SearchResult
     from ai_chess.evaluation.evaluator import BasicEvaluator
 
@@ -182,20 +182,3 @@ class MinimaxSearch(SearchAlgorithm):
             metrics.nodes_searched
         ):
             raise SearchStoppedError
-
-    def find_best_move(
-        self,
-        board: chess.Board,
-        evaluator: BasicEvaluator,
-        config: EngineConfig,
-        metrics: SearchMetrics,
-    ) -> chess.Move | None:
-        """Compatibility wrapper for the legacy minimax API."""
-        result = self.search(
-            board,
-            evaluator,
-            config,
-            SearchLimits(depth=config.max_depth),
-        )
-        metrics.copy_from(result.metrics)
-        return result.best_move

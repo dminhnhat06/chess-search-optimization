@@ -13,11 +13,8 @@ from typing import TextIO
 
 import chess
 
-from ai_chess.engine.chess_engine import ChessEngine
-from ai_chess.engine.config import EngineConfig
 from ai_chess.engine.limits import SearchLimits
-from ai_chess.evaluation.evaluator import BasicEvaluator
-from ai_chess.search.minimax import MinimaxSearch
+from ai_chess.presets import make_engine
 from ai_chess.uci.command_parser import UCICommand, parse_command
 from ai_chess.uci.response import best_move, info, ready_ok, uci_id
 
@@ -52,11 +49,7 @@ class UCISession:
         self._input = input_stream or sys.stdin
         self._output = output_stream or sys.stdout
         self.board = chess.Board()
-        self.engine = ChessEngine(
-            search_algorithm=MinimaxSearch(),
-            evaluator=BasicEvaluator(),
-            config=EngineConfig(max_depth=_DEFAULT_DEPTH),
-        )
+        self.engine = make_engine("v0_minimax", max_depth=_DEFAULT_DEPTH)
         self._running = False
 
     # ------------------------------------------------------------------
@@ -166,7 +159,6 @@ class UCISession:
         """
         depth = cmd.params.get("depth")
         search_depth = int(depth) if depth is not None else _DEFAULT_DEPTH
-        self.engine.config = EngineConfig(max_depth=search_depth)
 
         limits = SearchLimits(
             depth=search_depth,
