@@ -5,13 +5,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from ai_chess.engine.limits import SearchLimits
 from ai_chess.engine.result import SearchResult
 
 if TYPE_CHECKING:
     import chess
 
     from ai_chess.engine.config import EngineConfig
+    from ai_chess.engine.limits import SearchLimits
     from ai_chess.engine.metrics import SearchMetrics
     from ai_chess.evaluation.evaluator import BasicEvaluator
 
@@ -62,23 +62,6 @@ class SearchAlgorithm(ABC):
             Structured search result.
         """
         ...
-
-    def find_best_move(
-        self,
-        board: chess.Board,
-        evaluator: BasicEvaluator,
-        config: EngineConfig,
-        metrics: SearchMetrics,
-    ) -> chess.Move | None:
-        """Compatibility wrapper returning only the best move."""
-        result = self.search(
-            board,
-            evaluator,
-            config,
-            SearchLimits(depth=config.max_depth),
-        )
-        metrics.copy_from(result.metrics)
-        return result.best_move
 
     def reset(self) -> None:
         """Reset any algorithm-local state."""

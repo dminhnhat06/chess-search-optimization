@@ -75,7 +75,7 @@ class AlphaBetaSearch(SearchAlgorithm):
         completed_depth = depth
 
         try:
-            best_move, score, pv = self._search_root(
+            best_move, score, pv = self.search_root(
                 board=board,
                 evaluator=evaluator,
                 config=config,
@@ -109,7 +109,7 @@ class AlphaBetaSearch(SearchAlgorithm):
         if self.transposition_table is not None:
             self.transposition_table.clear()
 
-    def _search_root(
+    def search_root(
         self,
         *,
         board: chess.Board,
@@ -120,6 +120,15 @@ class AlphaBetaSearch(SearchAlgorithm):
         controller: SearchController,
         preferred_move: chess.Move | None,
     ) -> tuple[chess.Move | None, int, list[chess.Move]]:
+        """Search one root depth with caller-owned metrics and stop control.
+
+        This method is used by iterative deepening to complete one depth while
+        preserving cumulative metrics across iterations. It returns
+        ``(best_move, score, pv)`` when the root depth completes. If a limit is
+        reached, it raises ``SearchStoppedError`` carrying the best completed
+        root move when available, and it always restores the board before
+        returning or raising.
+        """
         legal_moves = stable_legal_moves(board)
         if not legal_moves:
             return None, evaluator.evaluate(board), []

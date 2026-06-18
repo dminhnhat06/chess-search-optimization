@@ -4,7 +4,8 @@ import chess
 import pytest
 
 from ai_chess.engine.config import EngineConfig
-from ai_chess.engine.metrics import SearchMetrics
+from ai_chess.engine.limits import SearchLimits
+from ai_chess.engine.result import SearchResult
 from ai_chess.evaluation.evaluator import BasicEvaluator
 from ai_chess.search.minimax import MinimaxSearch
 
@@ -22,7 +23,21 @@ def evaluator() -> BasicEvaluator:
 
 
 class TestMinimaxSearch:
-    """Tests for MinimaxSearch.find_best_move()."""
+    """Tests for MinimaxSearch.search()."""
+
+    @staticmethod
+    def _search(
+        minimax: MinimaxSearch,
+        board: chess.Board,
+        evaluator: BasicEvaluator,
+        config: EngineConfig,
+    ) -> SearchResult:
+        return minimax.search(
+            board,
+            evaluator,
+            config,
+            SearchLimits(depth=config.max_depth),
+        )
 
     def test_returns_legal_move_from_starting_position(
         self,
@@ -32,12 +47,11 @@ class TestMinimaxSearch:
         """Minimax should return a legal move from the starting position."""
         board = chess.Board()
         config = EngineConfig(max_depth=2)
-        metrics = SearchMetrics()
 
-        move = minimax.find_best_move(board, evaluator, config, metrics)
+        result = self._search(minimax, board, evaluator, config)
 
-        assert move is not None
-        assert move in board.legal_moves
+        assert result.best_move is not None
+        assert result.best_move in board.legal_moves
 
     def test_board_fen_unchanged_after_search(
         self,
@@ -48,9 +62,8 @@ class TestMinimaxSearch:
         board = chess.Board()
         original_fen = board.fen()
         config = EngineConfig(max_depth=2)
-        metrics = SearchMetrics()
 
-        minimax.find_best_move(board, evaluator, config, metrics)
+        self._search(minimax, board, evaluator, config)
 
         assert board.fen() == original_fen
 
@@ -62,11 +75,10 @@ class TestMinimaxSearch:
         """nodes_searched must be > 0 after a search."""
         board = chess.Board()
         config = EngineConfig(max_depth=2)
-        metrics = SearchMetrics()
 
-        minimax.find_best_move(board, evaluator, config, metrics)
+        result = self._search(minimax, board, evaluator, config)
 
-        assert metrics.nodes_searched > 0
+        assert result.metrics.nodes_searched > 0
 
     def test_depth_reached_matches_config(
         self,
@@ -76,11 +88,10 @@ class TestMinimaxSearch:
         """depth_reached should match the configured max_depth."""
         board = chess.Board()
         config = EngineConfig(max_depth=3)
-        metrics = SearchMetrics()
 
-        minimax.find_best_move(board, evaluator, config, metrics)
+        result = self._search(minimax, board, evaluator, config)
 
-        assert metrics.depth_reached == config.max_depth
+        assert result.metrics.depth_reached == config.max_depth
 
     def test_returns_none_when_no_legal_moves(
         self,
@@ -94,11 +105,10 @@ class TestMinimaxSearch:
         )
         assert board.is_checkmate()
         config = EngineConfig(max_depth=2)
-        metrics = SearchMetrics()
 
-        move = minimax.find_best_move(board, evaluator, config, metrics)
+        result = self._search(minimax, board, evaluator, config)
 
-        assert move is None
+        assert result.best_move is None
 
     def test_best_move_and_score_set_in_metrics(
         self,
@@ -108,9 +118,9 @@ class TestMinimaxSearch:
         """Metrics should have best_move and score set after search."""
         board = chess.Board()
         config = EngineConfig(max_depth=2)
-        metrics = SearchMetrics()
 
-        minimax.find_best_move(board, evaluator, config, metrics)
+        result = self._search(minimax, board, evaluator, config)
+        metrics = result.metrics
 
         assert metrics.best_move is not None
         assert metrics.score is not None

@@ -65,9 +65,9 @@ best_move, metrics = engine.find_best_move(board)
 ## Metrics
 
 `SearchMetrics` records regular nodes, quiescence nodes, alpha-beta cutoffs,
-transposition-table probes/hits/stores/collisions, reached depth, elapsed time,
-best move, score, completion state, and stop reason. Metrics are reset for each
-independent search result.
+transposition-table probes/hits/stores, reached depth, elapsed time, best move,
+score, completion state, and stop reason. Metrics are reset for each independent
+search result.
 
 ## Running Tests
 

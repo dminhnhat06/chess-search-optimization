@@ -113,7 +113,7 @@ def test_minimax_search_api_updates_result_and_metrics() -> None:
     result = search.search(
         board,
         BasicEvaluator(),
-        EngineConfig(max_depth=2, use_alpha_beta=False),
+        EngineConfig(max_depth=2),
         SearchLimits(depth=2),
     )
 
@@ -132,7 +132,7 @@ def test_alpha_beta_matches_minimax_score_and_searches_no_more_nodes() -> None:
     minimax_result = MinimaxSearch().search(
         board,
         evaluator,
-        EngineConfig(max_depth=3, use_alpha_beta=False),
+        EngineConfig(max_depth=3),
         SearchLimits(depth=3),
     )
     alpha_beta_result = AlphaBetaSearch().search(
