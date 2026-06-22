@@ -28,7 +28,7 @@ def parse_command(line: str) -> UCICommand:
     """Parse a raw UCI command string into a UCICommand.
 
     Handles all standard UCI commands:
-        uci, isready, ucinewgame, position, go, stop, quit.
+        uci, isready, ucinewgame, position, setoption, go, stop, quit.
 
     Args:
         line: A single line of UCI input (e.g., 'position startpos moves e2e4').
@@ -46,6 +46,8 @@ def parse_command(line: str) -> UCICommand:
 
     if name == "position":
         return _parse_position(tokens)
+    if name == "setoption":
+        return _parse_setoption(tokens)
     if name == "go":
         return _parse_go(tokens)
 
@@ -97,6 +99,34 @@ def _parse_position(tokens: list[str]) -> UCICommand:
         params["moves"] = tokens[idx:]
 
     return UCICommand(name="position", params=params)
+
+
+def _parse_setoption(tokens: list[str]) -> UCICommand:
+    """Parse a 'setoption' command.
+
+    Supported format::
+
+        setoption name <option name> [value <option value>]
+    """
+    params: dict[str, object] = {}
+    if len(tokens) < 3 or tokens[1].lower() != "name":
+        return UCICommand(name="setoption", params=params)
+
+    idx = 2
+    name_parts: list[str] = []
+    while idx < len(tokens) and tokens[idx].lower() != "value":
+        name_parts.append(tokens[idx])
+        idx += 1
+
+    if name_parts:
+        params["name"] = " ".join(name_parts)
+
+    if idx < len(tokens) and tokens[idx].lower() == "value":
+        value_parts = tokens[idx + 1 :]
+        if value_parts:
+            params["value"] = " ".join(value_parts)
+
+    return UCICommand(name="setoption", params=params)
 
 
 def _parse_go(tokens: list[str]) -> UCICommand:

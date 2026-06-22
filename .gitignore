@@ -3,11 +3,11 @@ __pycache__/
 .venv/
 .env
 .pytest_cache/
+.pytest_tmp/
 .ruff_cache/
+.matplotlib_cache/
 dist/
 build/
 *.egg-info/
-data/results/*.csv
-data/results/*.json
-fastchess-windows-x86-64
 data/results/
+fastchess-windows-x86-64/

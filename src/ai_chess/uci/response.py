@@ -10,10 +10,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     import chess
 
 
-def uci_id(name: str, author: str) -> list[str]:
+def uci_id(
+    name: str,
+    author: str,
+    options: Sequence[str] | None = None,
+) -> list[str]:
     """Format the UCI identification response.
 
     Sent in reply to the 'uci' command. Includes engine name, author,
@@ -26,11 +32,14 @@ def uci_id(name: str, author: str) -> list[str]:
     Returns:
         A list of response lines: ['id name ...', 'id author ...', 'uciok'].
     """
-    return [
+    lines = [
         f"id name {name}",
         f"id author {author}",
-        "uciok",
     ]
+    if options:
+        lines.extend(options)
+    lines.append("uciok")
+    return lines
 
 
 def ready_ok() -> str:

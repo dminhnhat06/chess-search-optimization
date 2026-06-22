@@ -34,6 +34,20 @@ class TestSimpleCommands:
         cmd = parse_command("stop")
         assert cmd.name == "stop"
 
+    def test_setoption_command(self) -> None:
+        """'setoption' should parse option name and value."""
+        cmd = parse_command("setoption name Algorithm value v3")
+        assert cmd.name == "setoption"
+        assert cmd.params["name"] == "Algorithm"
+        assert cmd.params["value"] == "v3"
+
+    def test_setoption_name_with_spaces(self) -> None:
+        """'setoption' should preserve multi-token option names."""
+        cmd = parse_command("setoption name Move Ordering value true")
+        assert cmd.name == "setoption"
+        assert cmd.params["name"] == "Move Ordering"
+        assert cmd.params["value"] == "true"
+
     def test_empty_line(self) -> None:
         """An empty line should return a command with empty name."""
         cmd = parse_command("")

@@ -41,6 +41,14 @@ class TestUCIHandshake:
         assert any(line.startswith("id author ") for line in lines)
         assert "uciok" in lines
 
+    def test_uci_advertises_research_options(self) -> None:
+        """'uci' should advertise configurable research presets."""
+        output = _run_session("uci\nquit\n")
+        lines = output.strip().split("\n")
+
+        assert any(line.startswith("option name Algorithm ") for line in lines)
+        assert any(line.startswith("option name Depth ") for line in lines)
+
     def test_isready(self) -> None:
         """'isready' should respond with 'readyok'."""
         output = _run_session("isready\nquit\n")
@@ -140,6 +148,35 @@ class TestPositionAndGo:
 
         assert "depth" in info_line
         assert "nodes" in info_line
+
+    def test_setoption_depth_controls_go_default(self) -> None:
+        """Depth option should apply when 'go' omits an explicit depth."""
+        output = _run_session(
+            "setoption name Depth value 1\n"
+            "position startpos\n"
+            "go\n"
+            "quit\n"
+        )
+        info_line = next(
+            line for line in output.strip().split("\n") if line.startswith("info")
+        )
+
+        assert "depth 1" in info_line
+
+    def test_setoption_algorithm_rebuilds_engine(self) -> None:
+        """Algorithm option should select the matching research preset."""
+        input_stream = io.StringIO(
+            "setoption name Algorithm value v5\n"
+            "position startpos\n"
+            "go depth 1\n"
+            "quit\n"
+        )
+        output_stream = io.StringIO()
+        session = UCISession(input_stream=input_stream, output_stream=output_stream)
+        session.run()
+
+        assert session.options.algorithm == "v5"
+        assert session.engine.config.use_quiescence
 
 
 class TestUCINewGame:

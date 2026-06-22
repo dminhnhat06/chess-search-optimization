@@ -13,16 +13,13 @@ from typing import TextIO
 
 import chess
 
-from ai_chess.engine.chess_engine import ChessEngine
-from ai_chess.engine.config import EngineConfig
 from ai_chess.engine.limits import SearchLimits
-from ai_chess.evaluation.evaluator import BasicEvaluator
-from ai_chess.search.minimax import MinimaxSearch
 from ai_chess.uci.command_parser import UCICommand, parse_command
+from ai_chess.uci.options import (
+    UCIEngineOptions,
+    uci_option_lines,
+)
 from ai_chess.uci.response import best_move, info, ready_ok, uci_id
-
-# Default search depth when 'go' is issued without depth or time params.
-_DEFAULT_DEPTH = 4
 
 
 class UCISession:
@@ -52,11 +49,8 @@ class UCISession:
         self._input = input_stream or sys.stdin
         self._output = output_stream or sys.stdout
         self.board = chess.Board()
-        self.engine = ChessEngine(
-            search_algorithm=MinimaxSearch(),
-            evaluator=BasicEvaluator(),
-            config=EngineConfig(max_depth=_DEFAULT_DEPTH),
-        )
+        self.options = UCIEngineOptions()
+        self.engine = self.options.make_engine()
         self._running = False
 
     # ------------------------------------------------------------------
@@ -103,6 +97,7 @@ class UCISession:
             "uci": self._handle_uci,
             "isready": self._handle_isready,
             "ucinewgame": self._handle_ucinewgame,
+            "setoption": self._handle_setoption,
             "position": self._handle_position,
             "go": self._handle_go,
             "stop": self._handle_stop,
@@ -118,7 +113,11 @@ class UCISession:
 
     def _handle_uci(self, _cmd: UCICommand) -> None:
         """Handle the 'uci' command — send engine identification."""
-        lines = uci_id(self.engine.name, self.engine.author)
+        lines = uci_id(
+            self.engine.name,
+            self.engine.author,
+            options=uci_option_lines(),
+        )
         for line in lines:
             self._send(line)
 
@@ -130,6 +129,16 @@ class UCISession:
         """Handle the 'ucinewgame' command — reset for a new game."""
         self.board = chess.Board()
         self.engine.new_game()
+
+    def _handle_setoption(self, cmd: UCICommand) -> None:
+        """Handle 'setoption' by updating options and rebuilding the engine."""
+        name = cmd.params.get("name")
+        if not isinstance(name, str):
+            return
+
+        value = cmd.params.get("value")
+        if self.options.set_option(name, value):
+            self.engine = self.options.make_engine()
 
     def _handle_position(self, cmd: UCICommand) -> None:
         """Handle the 'position' command — set up the board.
@@ -165,8 +174,7 @@ class UCISession:
             cmd: Parsed command with optional 'depth', 'movetime', etc.
         """
         depth = cmd.params.get("depth")
-        search_depth = int(depth) if depth is not None else _DEFAULT_DEPTH
-        self.engine.config = EngineConfig(max_depth=search_depth)
+        search_depth = int(depth) if depth is not None else self.options.depth
 
         limits = SearchLimits(
             depth=search_depth,

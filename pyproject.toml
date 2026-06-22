@@ -28,6 +28,7 @@ analysis = [
 ]
 
 [project.scripts]
+ai-chess-demo = "ai_chess.demo:main"
 ai-chess-uci = "ai_chess.uci.__main__:main"
 
 [tool.setuptools.packages.find]
@@ -36,7 +37,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --basetemp .pytest_tmp -p no:cacheprovider"
 
 [tool.ruff]
 src = ["src", "tests"]
