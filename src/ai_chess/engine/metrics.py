@@ -10,9 +10,7 @@ class SearchMetrics:
     """Metrics collected during a search operation.
 
     Used by all search algorithms to record performance statistics
-    such as nodes searched, cutoffs, and elapsed time. ``tt_collisions`` is
-    reserved for table implementations that can observe replacement/index
-    collisions; the current dict-backed table leaves it at zero.
+    such as nodes searched, cutoffs, and elapsed time.
     """
 
     nodes_searched: int = 0
@@ -22,7 +20,6 @@ class SearchMetrics:
     tt_probes: int = 0
     tt_hits: int = 0
     tt_stores: int = 0
-    tt_collisions: int = 0
     depth_reached: int = 0
     seldepth: int | None = None
     elapsed_seconds: float = 0.0
@@ -41,7 +38,6 @@ class SearchMetrics:
         self.tt_probes = 0
         self.tt_hits = 0
         self.tt_stores = 0
-        self.tt_collisions = 0
         self.depth_reached = 0
         self.seldepth = None
         self.elapsed_seconds = 0.0
@@ -50,11 +46,6 @@ class SearchMetrics:
         self.completed = True
         self.stopped_early = False
         self.stop_reason = None
-
-    def copy_from(self, other: SearchMetrics) -> None:
-        """Copy metric values from another metrics instance."""
-        for field_name, value in asdict(other).items():
-            setattr(self, field_name, value)
 
     def to_dict(self) -> dict[str, object]:
         """Convert metrics to a dictionary for serialization or logging."""

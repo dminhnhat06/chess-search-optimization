@@ -44,7 +44,7 @@ ai_chess/
 
 ```bash
 git clone <repo-url>
-cd ai-chess-search-optimization
+cd chess-search-optimization
 
 python -m venv .venv
 
@@ -99,16 +99,33 @@ ai-chess-uci
 The UCI adapter exposes the same V0-V5 ladder through `setoption name Algorithm
 value v0` through `v5`.
 
+## Core Engine API
+
+```python
+import chess
+
+from ai_chess.engine.limits import SearchLimits
+from ai_chess.presets import make_engine
+
+board = chess.Board()
+engine = make_engine("v3_alpha_beta_ordering_tt", max_depth=4)
+result = engine.search(board, SearchLimits(depth=4))
+```
+
+`ChessEngine.search(board, limits)` is the preferred API and returns a
+structured `SearchResult`. Existing callers can still use
+`find_best_move(board)`, which returns `(best_move, metrics)`.
+
 ## Implemented Algorithm Versions
 
 | Version | Preset | Algorithm | Description |
 | --- | --- | --- | --- |
 | **V0** | `v0_minimax` | Minimax | Depth-limited minimax baseline |
 | **V1** | `v1_alpha_beta` | Alpha-beta pruning | Minimax with alpha-beta cutoffs |
-| **V2** | `v2_alpha_beta_ordering` | Alpha-beta + move ordering | Captures, promotions, and preferred moves searched earlier |
-| **V3** | `v3_alpha_beta_ordering_tt` | Transposition table | Reuses cached position evaluations and best moves |
-| **V4** | `v4_iterative_deepening` | Iterative deepening | Searches progressively deeper and supports time-aware stopping |
-| **V5** | `v5_quiescence` | Quiescence search | Extends tactical leaves with bounded capture/evasion search |
+| **V2** | `v2_alpha_beta_ordering` | Alpha-beta + move ordering | Preferred moves, captures, promotions, checks, and deterministic tie-breaks |
+| **V3** | `v3_alpha_beta_ordering_tt` | Transposition table | Depth-aware table probes, hits, stores, best moves, and bound flags |
+| **V4** | `v4_iterative_deepening` | Iterative deepening | Progressively deeper searches with time/node-aware stopping |
+| **V5** | `v5_quiescence` | Quiescence search | Bounded tactical extension at leaf nodes to reduce horizon effects |
 
 ## Benchmark Dataset
 
@@ -352,7 +369,7 @@ instead of only pruning the same tree.
 ## Project Structure
 
 ```
-ai-chess-search-optimization/
+chess-search-optimization/
 ├── README.md
 ├── pyproject.toml
 ├── .gitignore
@@ -367,14 +384,14 @@ ai-chess-search-optimization/
 │   └── report_outline.md
 ├── src/
 │   └── ai_chess/
-│       ├── engine/
-│       ├── evaluation/
-│       ├── search/
-│       ├── optimization/
-│       ├── presets/
-│       ├── uci/
-│       ├── experiments/
-│       └── utils/
+│       ├── engine/         # ChessEngine, EngineConfig, SearchLimits, SearchResult
+│       ├── evaluation/     # BasicEvaluator and piece values
+│       ├── search/         # Minimax, alpha-beta, iterative deepening, quiescence
+│       ├── optimization/   # Move ordering, transposition table, search limits
+│       ├── presets/        # Named V0-V5 engine factory
+│       ├── uci/            # UCI protocol adapter and options
+│       ├── experiments/    # FEN loader and benchmark runner
+│       └── utils/          # Shared helpers
 ├── data/
 │   ├── positions/
 │   └── results/

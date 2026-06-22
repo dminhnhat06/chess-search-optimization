@@ -75,7 +75,7 @@ class IterativeDeepeningSearch(SearchAlgorithm):
                 break
 
             try:
-                move, score, pv = self.inner_search._search_root(
+                move, score, pv = self.inner_search.search_root(
                     board=board,
                     evaluator=evaluator,
                     config=config,

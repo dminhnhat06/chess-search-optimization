@@ -71,14 +71,19 @@ ProgressCallback = Callable[[dict[str, object]], None]
 def run_benchmark(
     positions: list[TestPosition],
     engine: ChessEngine,
+    limits: SearchLimits | None = None,
 ) -> list[BenchmarkRow]:
     """Run a preconfigured engine against positions.
 
     This compatibility wrapper keeps the old public entry point while returning
     the expanded benchmark row schema used by the experiment suite.
     """
-    depth = engine.config.max_depth
-    movetime_ms = (
+    depth = (
+        limits.depth
+        if limits is not None and limits.depth is not None
+        else engine.config.max_depth
+    )
+    movetime_ms = limits.movetime_ms if limits is not None else (
         int(engine.config.time_limit_seconds * 1000)
         if engine.config.time_limit_seconds is not None
         else None
@@ -91,7 +96,7 @@ def run_benchmark(
         engine.reset()
         result = engine.search(
             board,
-            SearchLimits(depth=depth, movetime_ms=movetime_ms),
+            limits or SearchLimits(depth=depth, movetime_ms=movetime_ms),
         )
         rows.append(
             build_benchmark_row(
